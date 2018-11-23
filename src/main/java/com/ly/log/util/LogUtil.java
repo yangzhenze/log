@@ -31,7 +31,7 @@ public class LogUtil {
     private String logStore; // 上面步骤创建的日志库名称
     private String logStoreFlag;
 
-    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy_MM_dd");
 
    public LogUtil(String logStore, String logStoreFlag){
        Properties properties = FileUtil.loadPropertiesFile("config.properties");
@@ -78,7 +78,7 @@ public class LogUtil {
         CountDownLatch countDownLatch = new CountDownLatch(logTotalPage);
 
         String tableName = "log_"+logStoreFlag+"_"+simpleDateFormat.format(new Date());
-        DBController dbController = new DBController();
+        /*DBController dbController = new DBController();
 
 
         if(!dbController.tableExist(tableName)){
@@ -86,7 +86,16 @@ public class LogUtil {
                 logger.error("创建{}表失败！",tableName);
                 throw new Exception();
             }
+        }*/
+
+        DataHubUtil dataHubUtil = new DataHubUtil();
+        if(!dataHubUtil.existTopic(tableName)){
+            dataHubUtil.createTopic(tableName);
+            MaxComputeUtil maxCompute = new MaxComputeUtil();
+            maxCompute.createTable(tableName);
+            dataHubUtil.createDataConnector(maxCompute.getProjectName(),tableName);
         }
+
 
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(5, 5,
                 0L, TimeUnit.MILLISECONDS,
@@ -94,7 +103,8 @@ public class LogUtil {
 
         while (logOffset <= totalLogLines) {
             ALiYun aLiYun = new ALiYun(endpoint,accessKeyId,accessKeySecret,project,logStore,beginSecond,endSecond,logOffset,logLine);
-            threadPoolExecutor.execute(new ThreadGetLogs(aLiYun,queriedLogs,countDownLatch,tableName));
+            //threadPoolExecutor.execute(new ThreadGetLogs(aLiYun,queriedLogs,countDownLatch,tableName));
+            threadPoolExecutor.execute(new ThreadLogs(aLiYun,queriedLogs,countDownLatch,tableName));
             logOffset += logLine;
         }
         countDownLatch.await();

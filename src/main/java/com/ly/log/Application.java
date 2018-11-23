@@ -6,7 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Properties;
+import java.util.Timer;
 
 /**
  * @author zzy
@@ -56,15 +59,14 @@ public class Application {
 
                 FileUtil.setLastTime(curTime,filePath,fileName);
                 lastTime = curTime;
-            }else{
-                System.out.println("请稍后..."+intervalSecond+"秒后执行");
+            } else {
                 try {
-                    Thread.sleep(intervalSecond*1000);
-
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
+
         }
 
 

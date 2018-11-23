@@ -6,16 +6,14 @@ import com.aliyun.openservices.log.common.QueriedLog;
 import com.aliyun.openservices.log.exception.LogException;
 import com.aliyun.openservices.log.request.GetLogsRequest;
 import com.aliyun.openservices.log.response.GetLogsResponse;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-public class ThreadGetLogs implements Runnable{
+public class ThreadLogs implements Runnable{
     private static final Logger logger = (Logger) LoggerFactory.getLogger(LogUtil.class);
     private ALiYun aLiYun = new ALiYun();
     private List<QueriedLog> queriedLogs;
@@ -25,7 +23,7 @@ public class ThreadGetLogs implements Runnable{
     public ALiYun getaLiYun() {
         return aLiYun;
     }
-    public ThreadGetLogs(ALiYun aLiYun,List<QueriedLog> queriedLogs,CountDownLatch countDownLatch,String tableName){
+    public ThreadLogs(ALiYun aLiYun, List<QueriedLog> queriedLogs, CountDownLatch countDownLatch, String tableName){
         this.aLiYun = aLiYun;
         this.queriedLogs = queriedLogs;
         this.countDownLatch = countDownLatch;
@@ -71,12 +69,11 @@ public class ThreadGetLogs implements Runnable{
 
             if (res4 != null && res4.IsCompleted()) {
                 StringBuffer sb = new StringBuffer();
+                List<String []> paramList = new ArrayList<>();
 
                for(QueriedLog log:res4.GetLogs()){
                     LogItem item = log.GetLogItem();
                     String [] params = new String[29];
-
-
                    int index = 10;
                    for(LogContent content : item.GetLogContents()){
                        switch (content.GetKey()){
@@ -125,42 +122,18 @@ public class ThreadGetLogs implements Runnable{
                            case "__tag__:__receive_time__":
                                break;
                            default:
-                               params[index] =  content.GetKey()+":"+content.GetValue();
+                               params[index] = content.GetValue();
                                ++index;
                                break;
                        }
                    }
-
-                    sb.append("(");
-
-                    for (int i = 0;i<params.length;i++){
-                        if(null != params[i]){
-                            sb.append("'"+params[i]+"'");
-                        }else{
-                            sb.append(params[i]);
-                        }
-
-                        if(i != params.length-1){
-                            sb.append(",");
-                        }
-
-                   }
-                    sb.append("),");
-
+                   paramList.add(params);
                 }
-
-            DBController dbController = new DBController();
-            if(sb.toString().length() > 1){
-                dbController.insertData(sb.substring(0,sb.length()-1).toString(),tableName);
+               DataHubUtil dataHubUtil = new DataHubUtil();
+               dataHubUtil.insert(this.tableName,paramList);
             }
-            /*synchronized (queriedLogs){
-
-                queriedLogs.addAll(res4.GetLogs())
-            }*/
-            //queriedLogs.addAll(res4.GetLogs());
             countDownLatch.countDown();
             break;
-            }
             //Thread.sleep(200);
         }
         System.out.println(countDownLatch+" | Read log count:" + String.valueOf(res4.GetCount()));

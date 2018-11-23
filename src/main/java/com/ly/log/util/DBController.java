@@ -9,7 +9,7 @@ public class DBController {
     public boolean createTable(String tableName){
         String params = "";
 
-        for(int i = 1; i<=25;i++){
+        for(int i = 1; i<=19;i++){
             params += "  `params"+i+"` varchar(255) DEFAULT NULL ,";
         }
         params = params.substring(0,params.length()-1);
@@ -19,6 +19,12 @@ public class DBController {
                 "  `log_type` varchar(255) DEFAULT NULL COMMENT '日志类型'," +
                 "  `event_type` varchar(255) DEFAULT NULL COMMENT '事件类型'," +
                 "  `logname` varchar(255) DEFAULT NULL COMMENT '日志名称'," +
+                "  `roleid` varchar(255) DEFAULT NULL COMMENT '角色id'," +
+                "  `rolename` varchar(255) DEFAULT NULL COMMENT '用户名'," +
+                "  `userid` varchar(255) DEFAULT NULL COMMENT '用户id'," +
+                "  `account` varchar(255) DEFAULT NULL COMMENT '用户账号'," +
+                "  `serverid` varchar(255) DEFAULT NULL COMMENT '用户服务'," +
+                "  `logtime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '日志时间'," +
                 params+
                 ") ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;";
 

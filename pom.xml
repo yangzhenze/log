@@ -74,6 +74,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.aliyun.datahub</groupId>
+            <artifactId>aliyun-sdk-datahub</artifactId>
+            <version>2.9.2-public</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.aliyun.odps</groupId>
             <artifactId>odps-sdk-core</artifactId>
             <version>0.26.2-public</version>
